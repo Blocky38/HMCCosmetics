@@ -165,6 +165,10 @@ public class HMCCosmetics extends JavaPlugin {
                 });
     }
 
+    public TaskManager getTaskManager() {
+        return taskManager;
+    }
+
     public Settings getSettings() {
         return settings;
     }

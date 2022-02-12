@@ -18,6 +18,7 @@ public class WardrobeSettings {
     private static final String PORTABLE_PATH = WARDROBE_PATH + ".portable";
     private static final String ALWAYS_DISPLAY_PATH = WARDROBE_PATH + ".always-display";
     private static final String STATIC_RADIUS_PATH = WARDROBE_PATH + ".static-radius";
+    private static final String ROTATION_SPEED_PATH = WARDROBE_PATH + ".rotation-speed";
     private static final String STATIC_LOCATION_PATH = WARDROBE_PATH + ".wardrobe-location";
     private static final String WORLD_PATH = "world";
     private static final String X_PATH = "x";
@@ -34,6 +35,7 @@ public class WardrobeSettings {
     private boolean portable;
     private boolean alwaysDisplay;
     private int staticRadius;
+    private int rotationSpeed;
     private Location location;
 
     public WardrobeSettings(final HMCCosmetics plugin) {
@@ -47,6 +49,7 @@ public class WardrobeSettings {
         this.portable = config.getBoolean(PORTABLE_PATH);
         this.staticRadius = config.getInt(STATIC_RADIUS_PATH);
         this.alwaysDisplay = config.getBoolean(ALWAYS_DISPLAY_PATH);
+        this.rotationSpeed = config.getInt(ROTATION_SPEED_PATH);
         final ConfigurationSection locationSection = config.getConfigurationSection(STATIC_LOCATION_PATH);
         if (locationSection == null) return;
         this.location = this.loadLocation(locationSection);
@@ -85,6 +88,10 @@ public class WardrobeSettings {
 
     public int getStaticRadius() {
         return staticRadius;
+    }
+
+    public int getRotationSpeed() {
+        return rotationSpeed;
     }
 
     public Location getLocation() {

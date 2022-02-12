@@ -15,6 +15,8 @@ wardrobe:
   always-display: false
   # spawn static wardrobe if in this radius of wardrobe-location
   static-radius: 10
+  # how much yaw should change per tick, set to 0 for none
+  rotation-speed: 3
   # location of static wardrobe, remove for none
   wardrobe-location:
     world: "World"

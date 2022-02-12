@@ -1,5 +1,6 @@
 package io.github.fisher2911.hmccosmetics.user;
 
+import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import io.github.fisher2911.hmccosmetics.HMCCosmetics;
 import io.github.fisher2911.hmccosmetics.config.Settings;
@@ -7,6 +8,9 @@ import io.github.fisher2911.hmccosmetics.config.WardrobeSettings;
 import io.github.fisher2911.hmccosmetics.gui.ArmorItem;
 import io.github.fisher2911.hmccosmetics.inventory.PlayerArmor;
 import io.github.fisher2911.hmccosmetics.packet.PacketManager;
+import io.github.fisher2911.hmccosmetics.task.DataTask;
+import io.github.fisher2911.hmccosmetics.task.SupplierTask;
+import io.github.fisher2911.hmccosmetics.task.Task;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -16,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Wardrobe extends User {
 
@@ -65,6 +70,7 @@ public class Wardrobe extends User {
                 viewer,
                 this.getUuid()
         );
+
         PacketManager.sendPacket(viewer, playerInfoPacket, playerSpawnPacket);
         this.spawnArmorStand(viewer, this.currentLocation);
         this.updateArmorStand(viewer, plugin.getSettings(), this.currentLocation);
@@ -72,7 +78,7 @@ public class Wardrobe extends User {
         PacketManager.sendPacket(viewer, PacketManager.getRotationPacket(this.getEntityId(), this.currentLocation));
 
         this.spawned = true;
-        Collections.shuffle(new ArrayList<>(), new Random());
+        this.startSpinTask(viewer);
     }
 
     @Override
@@ -94,6 +100,30 @@ public class Wardrobe extends User {
             if (this.currentLocation == null) return;
             this.spawnFakePlayer(viewer);
         }
+    }
+
+    private void startSpinTask(final Player player) {
+        final AtomicInteger data = new AtomicInteger();
+        final int rotationSpeed = this.plugin.getSettings().getWardrobeSettings().getRotationSpeed();
+        final Task task = new SupplierTask(
+                () -> {
+                    final Location location = this.currentLocation.clone();
+                    final int yaw = data.get();
+                    location.setYaw(yaw);
+                    PacketManager.sendPacket(player, PacketManager.getLookPacket(this.getEntityId(), location));
+                    this.updateArmorStand(player, this.plugin.getSettings(), location);
+                    location.setYaw(this.getNextYaw(yaw - 30, rotationSpeed));
+                    PacketManager.sendPacket(player, PacketManager.getRotationPacket(this.getEntityId(), location));
+                    data.set(this.getNextYaw(yaw, rotationSpeed));
+                },
+                () -> !this.spawned
+        );
+        this.plugin.getTaskManager().submit(task);
+    }
+
+    private int getNextYaw(final int current, final int rotationSpeed) {
+        if (current + rotationSpeed > 179) return -179;
+        return current + rotationSpeed;
     }
 
     @Override
