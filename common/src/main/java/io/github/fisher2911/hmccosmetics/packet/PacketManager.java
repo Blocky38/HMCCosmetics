@@ -51,13 +51,13 @@ public class PacketManager {
         packet.getIntegers().write(0, entityId);
         // Entity Type
 //        packet.getIntegers().write(6, 78);
-        // Set yaw pitch
-        packet.getIntegers().write(4, (int) location.getPitch());
-        packet.getIntegers().write(5, (int) location.getYaw());
         // Set location
         packet.getDoubles().write(0, location.getX());
         packet.getDoubles().write(1, location.getY());
         packet.getDoubles().write(2, location.getZ());
+        // Set yaw pitch
+        packet.getIntegers().write(4, (int) location.getPitch());
+        packet.getIntegers().write(5, (int) location.getYaw());
         // Set UUID
         packet.getUUIDs().write(0, UUID.randomUUID());
 
@@ -85,6 +85,17 @@ public class PacketManager {
 
         rotationPacket.getIntegers().write(0, entityId);
         rotationPacket.getBytes().write(0, (byte) (location.getYaw() * 256 / 360));
+
+        return rotationPacket;
+    }
+
+    public static PacketContainer getLookPacket(final int entityId, final Location location) {
+        final PacketContainer rotationPacket = new PacketContainer(
+                PacketType.Play.Server.ENTITY_LOOK);
+
+        rotationPacket.getIntegers().write(0, entityId);
+        rotationPacket.getBytes().write(0, (byte) (location.getYaw() * 256 / 360));
+//        rotationPacket.getBytes().write(1, (byte) (location.getPitch() * 256 / 360));
 
         return rotationPacket;
     }

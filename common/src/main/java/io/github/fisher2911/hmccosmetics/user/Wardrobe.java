@@ -12,7 +12,9 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 import java.util.UUID;
 
 public class Wardrobe extends User {
@@ -66,8 +68,11 @@ public class Wardrobe extends User {
         PacketManager.sendPacket(viewer, playerInfoPacket, playerSpawnPacket);
         this.spawnArmorStand(viewer, this.currentLocation);
         this.updateArmorStand(viewer, plugin.getSettings(), this.currentLocation);
-//        PacketManager.sendPacket(viewer, PacketManager.getRotationPacket(this.getEntityId(), this.currentLocation));
+        PacketManager.sendPacket(viewer, PacketManager.getLookPacket(this.getEntityId(), this.currentLocation));
+        PacketManager.sendPacket(viewer, PacketManager.getRotationPacket(this.getEntityId(), this.currentLocation));
+
         this.spawned = true;
+        Collections.shuffle(new ArrayList<>(), new Random());
     }
 
     @Override

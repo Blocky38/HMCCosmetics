@@ -93,12 +93,14 @@ public class WardrobeSettings {
 
     public boolean inDistanceOfWardrobe(final Location wardrobeLocation, final Location playerLocation) {
         if (this.displayRadius == -1) return true;
+        if (!wardrobeLocation.getWorld().equals(playerLocation.getWorld())) return false;
         return playerLocation.distanceSquared(wardrobeLocation) <= this.displayRadius * this.displayRadius;
     }
 
     public boolean inDistanceOfStatic(final Location location) {
         if (this.location == null) return false;
         if (this.staticRadius == -1) return false;
+        if (!this.location.getWorld().equals(location.getWorld())) return false;
         return this.location.distanceSquared(location) <= this.staticRadius * this.staticRadius;
     }
 }

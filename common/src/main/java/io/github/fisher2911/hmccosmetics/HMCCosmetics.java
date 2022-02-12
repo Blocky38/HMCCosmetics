@@ -21,6 +21,7 @@ import io.github.fisher2911.hmccosmetics.listener.TeleportListener;
 import io.github.fisher2911.hmccosmetics.message.MessageHandler;
 import io.github.fisher2911.hmccosmetics.message.Messages;
 import io.github.fisher2911.hmccosmetics.message.Translation;
+import io.github.fisher2911.hmccosmetics.task.TaskManager;
 import io.github.fisher2911.hmccosmetics.user.UserManager;
 
 import java.nio.file.Path;
@@ -42,6 +43,7 @@ public class HMCCosmetics extends JavaPlugin {
     public static final Path PLUGIN_FOLDER = Paths.get("plugins", "HMCCosmetics");
 
     private ProtocolManager protocolManager;
+    private TaskManager taskManager;
     private Settings settings;
     private UserManager userManager;
     private CosmeticManager cosmeticManager;
@@ -57,7 +59,9 @@ public class HMCCosmetics extends JavaPlugin {
         final int pluginId = 13873;
         final Metrics metrics = new Metrics(this, pluginId);
 
-        protocolManager = ProtocolLibrary.getProtocolManager();
+        this.protocolManager = ProtocolLibrary.getProtocolManager();
+        this.taskManager = new TaskManager(this);
+        this.taskManager.start();
         this.settings = new Settings(this);
         this.messageHandler = new MessageHandler(this);
         this.userManager = new UserManager(this);
