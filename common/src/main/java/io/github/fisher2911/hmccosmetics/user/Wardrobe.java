@@ -1,6 +1,5 @@
 package io.github.fisher2911.hmccosmetics.user;
 
-import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import io.github.fisher2911.hmccosmetics.HMCCosmetics;
 import io.github.fisher2911.hmccosmetics.config.Settings;
@@ -8,17 +7,17 @@ import io.github.fisher2911.hmccosmetics.config.WardrobeSettings;
 import io.github.fisher2911.hmccosmetics.gui.ArmorItem;
 import io.github.fisher2911.hmccosmetics.inventory.PlayerArmor;
 import io.github.fisher2911.hmccosmetics.packet.PacketManager;
-import io.github.fisher2911.hmccosmetics.task.DataTask;
 import io.github.fisher2911.hmccosmetics.task.SupplierTask;
+import io.github.fisher2911.hmccosmetics.task.SyncedTask;
 import io.github.fisher2911.hmccosmetics.task.Task;
+import io.github.fisher2911.hmccosmetics.task.TaskChain;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,6 +26,7 @@ public class Wardrobe extends User {
     private final HMCCosmetics plugin;
     private final UUID ownerUUID;
     private final int entityId;
+    private final int viewerId;
     private boolean active;
 
     private boolean spawned;
@@ -40,19 +40,46 @@ public class Wardrobe extends User {
             final PlayerArmor playerArmor,
             final int armorStandId,
             final int entityId,
+            final int viewerId,
             final boolean active) {
         super(uuid, playerArmor, armorStandId);
         this.plugin = plugin;
         this.ownerUUID = ownerUUID;
         this.entityId = entityId;
+        this.viewerId = viewerId;
         this.active = active;
         this.wardrobe = this;
     }
 
     public void spawnFakePlayer(final Player viewer) {
+        viewer.sendMessage("main - " +Thread.currentThread().toString());
+
         final WardrobeSettings settings = this.plugin.getSettings().getWardrobeSettings();
         if (settings.inDistanceOfStatic(viewer.getLocation())) {
-            this.currentLocation = settings.getLocation();
+            this.currentLocation = settings.getWardrobeLocation();
+            new TaskChain(this.plugin).chain(() -> {
+                viewer.setGameMode(GameMode.SPECTATOR);
+                viewer.sendMessage("main - " + Thread.currentThread().toString());
+            }).chain(
+                    () -> {
+                        PacketManager.sendPacket(
+                                viewer,
+                                PacketManager.getEntitySpawnPacket(
+                                        settings.getViewerLocation(),
+                                        this.viewerId,
+                                        EntityType.ZOMBIE
+                                )/*,
+                                PacketManager.getSpectatorPacket(
+                                        viewer,
+                                        this.viewerId
+                                )*/
+                        );
+                        viewer.sendMessage("not main - " + Thread.currentThread().toString());
+                    },
+                    true
+            ).execute();
+
+
         } else if (this.currentLocation == null) {
             this.currentLocation = viewer.getLocation().clone();
             this.currentLocation.setPitch(0);
@@ -89,6 +116,7 @@ public class Wardrobe extends User {
     public void despawnFakePlayer(final Player viewer) {
         final WardrobeSettings settings = this.plugin.getSettings().getWardrobeSettings();
         PacketManager.sendPacket(viewer, PacketManager.getEntityDestroyPacket(this.getEntityId()));
+        PacketManager
         this.despawnAttached();
         this.active = false;
         this.spawned = false;
@@ -96,7 +124,7 @@ public class Wardrobe extends User {
         this.getPlayerArmor().clear();
 
         if (settings.isAlwaysDisplay()) {
-            this.currentLocation = settings.getLocation();
+            this.currentLocation = settings.getWardrobeLocation();
             if (this.currentLocation == null) return;
             this.spawnFakePlayer(viewer);
         }
@@ -116,7 +144,7 @@ public class Wardrobe extends User {
                     PacketManager.sendPacket(player, PacketManager.getRotationPacket(this.getEntityId(), location));
                     data.set(this.getNextYaw(yaw, rotationSpeed));
                 },
-                () -> !this.spawned
+                () -> !this.spawned || this.currentLocation == null
         );
         this.plugin.getTaskManager().submit(task);
     }

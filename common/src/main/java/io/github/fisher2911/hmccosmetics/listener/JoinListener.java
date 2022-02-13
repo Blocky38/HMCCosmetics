@@ -35,9 +35,9 @@ public class JoinListener implements Listener {
                         () -> {
                             this.userManager.resendCosmetics(player);
                             final WardrobeSettings settings = this.plugin.getSettings().getWardrobeSettings();
-                            if (settings.isAlwaysDisplay() && settings.getLocation() != null) {
+                            if (settings.isAlwaysDisplay() && settings.getWardrobeLocation() != null) {
                                 final Wardrobe wardrobe = user.getWardrobe();
-                                wardrobe.setCurrentLocation(settings.getLocation());
+                                wardrobe.setCurrentLocation(settings.getWardrobeLocation());
                                 wardrobe.spawnFakePlayer(player);
                             }
                         }));

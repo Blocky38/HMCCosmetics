@@ -163,6 +163,7 @@ public class Database {
                 PlayerArmor.empty(),
                 FAKE_ENTITY_ID.getAndDecrement(),
                 FAKE_ENTITY_ID.getAndDecrement(),
+                FAKE_ENTITY_ID.getAndDecrement(),
                 false
         );
     }

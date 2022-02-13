@@ -1,11 +1,11 @@
 package io.github.fisher2911.hmccosmetics.config;
 
+import com.mysql.jdbc.ConnectionFeatureNotAvailableException;
 import io.github.fisher2911.hmccosmetics.HMCCosmetics;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.Nullable;
 
 import org.bukkit.Location;
@@ -20,6 +20,7 @@ public class WardrobeSettings {
     private static final String STATIC_RADIUS_PATH = WARDROBE_PATH + ".static-radius";
     private static final String ROTATION_SPEED_PATH = WARDROBE_PATH + ".rotation-speed";
     private static final String STATIC_LOCATION_PATH = WARDROBE_PATH + ".wardrobe-location";
+    private static final String VIEWER_LOCATION_PATH = WARDROBE_PATH + ".viewer-location";
     private static final String WORLD_PATH = "world";
     private static final String X_PATH = "x";
     private static final String Y_PATH = "y";
@@ -36,7 +37,8 @@ public class WardrobeSettings {
     private boolean alwaysDisplay;
     private int staticRadius;
     private int rotationSpeed;
-    private Location location;
+    private Location wardrobeLocation;
+    private Location viewerLocation;
 
     public WardrobeSettings(final HMCCosmetics plugin) {
         this.plugin = plugin;
@@ -50,9 +52,14 @@ public class WardrobeSettings {
         this.staticRadius = config.getInt(STATIC_RADIUS_PATH);
         this.alwaysDisplay = config.getBoolean(ALWAYS_DISPLAY_PATH);
         this.rotationSpeed = config.getInt(ROTATION_SPEED_PATH);
-        final ConfigurationSection locationSection = config.getConfigurationSection(STATIC_LOCATION_PATH);
-        if (locationSection == null) return;
-        this.location = this.loadLocation(locationSection);
+
+        final ConfigurationSection wardrobeLocationSection = config.getConfigurationSection(STATIC_LOCATION_PATH);
+        if (wardrobeLocationSection == null) return;
+        this.wardrobeLocation = this.loadLocation(wardrobeLocationSection);
+
+        final ConfigurationSection viewerLocationSection = config.getConfigurationSection(VIEWER_LOCATION_PATH);
+        if (viewerLocationSection == null) return;
+        this.viewerLocation = this.loadLocation(viewerLocationSection);
     }
 
     @Nullable
@@ -94,8 +101,12 @@ public class WardrobeSettings {
         return rotationSpeed;
     }
 
-    public Location getLocation() {
-        return location.clone();
+    public Location getWardrobeLocation() {
+        return this.wardrobeLocation.clone();
+    }
+
+    public Location getViewerLocation() {
+        return viewerLocation;
     }
 
     public boolean inDistanceOfWardrobe(final Location wardrobeLocation, final Location playerLocation) {
@@ -105,9 +116,9 @@ public class WardrobeSettings {
     }
 
     public boolean inDistanceOfStatic(final Location location) {
-        if (this.location == null) return false;
+        if (this.wardrobeLocation == null) return false;
         if (this.staticRadius == -1) return false;
-        if (!this.location.getWorld().equals(location.getWorld())) return false;
-        return this.location.distanceSquared(location) <= this.staticRadius * this.staticRadius;
+        if (!this.wardrobeLocation.getWorld().equals(location.getWorld())) return false;
+        return this.wardrobeLocation.distanceSquared(location) <= this.staticRadius * this.staticRadius;
     }
 }

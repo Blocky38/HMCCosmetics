@@ -163,6 +163,13 @@ public class PacketManager {
         return playerPackets.getRemovePacket(player, uuid, entityId);
     }
 
+    public static PacketContainer getSpectatorPacket(final Player player, final int entityId) {
+        final PacketContainer packetContainer = new PacketContainer(PacketType.Play.Client.SPECTATE);
+        packetContainer.getUUIDs().write(0, player.getUniqueId());
+        packetContainer.getIntegers().write(0, entityId);
+        return packetContainer;
+    }
+
     public static void sendPacket(final Player to, final PacketContainer... packets) {
         final ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
         try {

@@ -25,3 +25,10 @@ wardrobe:
     z: 0
     yaw: 0
     pitch: 0
+  viewer-location:
+    world: "World"
+    x: 5
+    y: 0
+    z: 5
+    yaw: 0
+    pitch: 0
