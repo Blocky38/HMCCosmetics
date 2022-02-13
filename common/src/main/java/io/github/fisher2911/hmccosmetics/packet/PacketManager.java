@@ -13,6 +13,7 @@ import io.github.fisher2911.nms.DestroyPacket_1_18_R1;
 import io.github.fisher2911.nms.PlayerPackets_1_17_R1;
 import io.github.fisher2911.nms.PlayerPackets_1_18_R1;
 import io.github.fisher2911.nms.PlayerPackets;
+import net.minecraft.server.v1_16_R3.PacketPlayInSpectate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -43,8 +44,18 @@ public class PacketManager {
         }
     }
 
-    public static PacketContainer getEntitySpawnPacket(final Location location, final int entityId,
+    public static PacketContainer getEntitySpawnPacket(
+            final Location location,
+            final int entityId,
             final EntityType entityType) {
+            return getEntitySpawnPacket(location, entityId, entityType, UUID.randomUUID());
+    }
+
+    public static PacketContainer getEntitySpawnPacket(
+            final Location location,
+            final int entityId,
+            final EntityType entityType,
+            final UUID uuid) {
         final PacketContainer packet = new PacketContainer(PacketType.Play.Server.SPAWN_ENTITY);
 
         // Entity ID
@@ -59,7 +70,7 @@ public class PacketManager {
         packet.getIntegers().write(4, (int) location.getPitch());
         packet.getIntegers().write(5, (int) location.getYaw());
         // Set UUID
-        packet.getUUIDs().write(0, UUID.randomUUID());
+        packet.getUUIDs().write(0, uuid);
 
         packet.getEntityTypeModifier().write(0, entityType);
 
@@ -163,9 +174,8 @@ public class PacketManager {
         return playerPackets.getRemovePacket(player, uuid, entityId);
     }
 
-    public static PacketContainer getSpectatorPacket(final Player player, final int entityId) {
-        final PacketContainer packetContainer = new PacketContainer(PacketType.Play.Client.SPECTATE);
-        packetContainer.getUUIDs().write(0, player.getUniqueId());
+    public static PacketContainer getSpectatePacket(final int entityId) {
+        final PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.CAMERA);
         packetContainer.getIntegers().write(0, entityId);
         return packetContainer;
     }

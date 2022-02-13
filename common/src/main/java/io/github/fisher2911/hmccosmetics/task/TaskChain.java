@@ -38,7 +38,6 @@ public class TaskChain {
             Bukkit.getScheduler().runTaskAsynchronously(
                     this.plugin,
                     () -> {
-                        Bukkit.broadcastMessage("Running async: " + Thread.currentThread());
                         task.getRunnable().run();
                         if (next == null) return;
                         run(next, this.tasks.poll());
@@ -49,7 +48,6 @@ public class TaskChain {
         Bukkit.getScheduler().runTask(
                 this.plugin,
                 () -> {
-                    Bukkit.broadcastMessage("Running sync: " + Thread.currentThread());
                     task.getRunnable().run();
                     if (next == null) return;
                     run(next, this.tasks.poll());

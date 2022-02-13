@@ -8,13 +8,10 @@ import io.github.fisher2911.hmccosmetics.gui.ArmorItem;
 import io.github.fisher2911.hmccosmetics.inventory.PlayerArmor;
 import io.github.fisher2911.hmccosmetics.packet.PacketManager;
 import io.github.fisher2911.hmccosmetics.task.SupplierTask;
-import io.github.fisher2911.hmccosmetics.task.SyncedTask;
 import io.github.fisher2911.hmccosmetics.task.Task;
 import io.github.fisher2911.hmccosmetics.task.TaskChain;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +25,7 @@ public class Wardrobe extends User {
     private final int entityId;
     private final int viewerId;
     private boolean active;
+    private boolean cameraLocked;
 
     private boolean spawned;
 
@@ -52,32 +50,38 @@ public class Wardrobe extends User {
     }
 
     public void spawnFakePlayer(final Player viewer) {
-        viewer.sendMessage("main - " +Thread.currentThread().toString());
 
         final WardrobeSettings settings = this.plugin.getSettings().getWardrobeSettings();
         if (settings.inDistanceOfStatic(viewer.getLocation())) {
             this.currentLocation = settings.getWardrobeLocation();
-            new TaskChain(this.plugin).chain(() -> {
-                viewer.setGameMode(GameMode.SPECTATOR);
-                viewer.sendMessage("main - " + Thread.currentThread().toString());
-            }).chain(
+            new TaskChain(this.plugin).chain(
                     () -> {
-                        PacketManager.sendPacket(
-                                viewer,
-                                PacketManager.getEntitySpawnPacket(
-                                        settings.getViewerLocation(),
-                                        this.viewerId,
-                                        EntityType.ZOMBIE
-                                )/*,
-                                PacketManager.getSpectatorPacket(
-                                        viewer,
-                                        this.viewerId
-                                )*/
-                        );
-                        viewer.sendMessage("not main - " + Thread.currentThread().toString());
-                    },
-                    true
+                        viewer.teleport(settings.getViewerLocation());
+                        this.cameraLocked = true;
+                    }
             ).execute();
+            // for if we ever switch to packets
+//            final Location viewerLocation = settings.getViewerLocation();
+//            final UUID viewerUUID = UUID.randomUUID();
+//            new TaskChain(this.plugin).chain(() -> {
+//                viewer.setGameMode(GameMode.SPECTATOR);
+//            }).chain(
+//                    () -> {
+//                        PacketManager.sendPacket(
+//                                viewer,
+//                                PacketManager.getEntitySpawnPacket(
+//                                        viewerLocation,
+//                                        this.viewerId,
+//                                        EntityType.ZOMBIE,
+//                                        viewerUUID
+//                                ),
+//                                PacketManager.getLookPacket(this.viewerId, viewerLocation),
+//                                PacketManager.getRotationPacket(this.viewerId, viewerLocation),
+//                                PacketManager.getSpectatePacket(this.viewerId)
+//                                );
+//                    },
+//                    true
+//            ).execute();
 
 
         } else if (this.currentLocation == null) {
@@ -115,11 +119,16 @@ public class Wardrobe extends User {
 
     public void despawnFakePlayer(final Player viewer) {
         final WardrobeSettings settings = this.plugin.getSettings().getWardrobeSettings();
-        PacketManager.sendPacket(viewer, PacketManager.getEntityDestroyPacket(this.getEntityId()));
-        PacketManager
+        PacketManager.sendPacket(
+                viewer,
+                PacketManager.getEntityDestroyPacket(this.getEntityId())
+                // for spectator packets
+//                PacketManager.getEntityDestroyPacket(this.viewerId)
+        );
         this.despawnAttached();
         this.active = false;
         this.spawned = false;
+        this.cameraLocked = false;
         this.currentLocation = null;
         this.getPlayerArmor().clear();
 
@@ -135,6 +144,7 @@ public class Wardrobe extends User {
         final int rotationSpeed = this.plugin.getSettings().getWardrobeSettings().getRotationSpeed();
         final Task task = new SupplierTask(
                 () -> {
+                    if (this.currentLocation == null) return;
                     final Location location = this.currentLocation.clone();
                     final int yaw = data.get();
                     location.setYaw(yaw);
@@ -152,6 +162,10 @@ public class Wardrobe extends User {
     private int getNextYaw(final int current, final int rotationSpeed) {
         if (current + rotationSpeed > 179) return -179;
         return current + rotationSpeed;
+    }
+
+    public boolean isCameraLocked() {
+        return cameraLocked;
     }
 
     @Override

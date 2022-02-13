@@ -11,6 +11,7 @@ import io.github.fisher2911.hmccosmetics.gui.ArmorItem;
 import io.github.fisher2911.hmccosmetics.inventory.PlayerArmor;
 import io.github.fisher2911.hmccosmetics.packet.PacketManager;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -177,6 +178,7 @@ public class User {
     public boolean shouldShow(final Player other) {
         final Player player = this.getPlayer();
         return player == null ||
+                player.getGameMode() != GameMode.SPECTATOR ||
                 (!player.hasPotionEffect(PotionEffectType.INVISIBILITY) &&
                         other.canSee(player) &&
                         !player.isSwimming());
