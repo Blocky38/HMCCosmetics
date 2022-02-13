@@ -128,31 +128,64 @@ public class UserManager {
 
         final PlayerArmor playerArmor = user.getPlayerArmor();
 
-        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> hatList = new ArrayList<>();
-        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> offHandList = new ArrayList<>();
+//        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> hatList = new ArrayList<>();
+//        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> offHandList = new ArrayList<>();
 
         final boolean hidden = !user.shouldShow(other);
 
-        final ItemStack hat = this.getCosmeticItem(user, equipment, playerArmor.getHat(), EquipmentSlot.HEAD, hidden);
-        hatList.add(new Pair<>(EnumWrappers.ItemSlot.HEAD, hat));
-        final ItemStack offHand = this.getCosmeticItem(user, equipment, playerArmor.getOffHand(), EquipmentSlot.OFF_HAND, hidden);
-        offHandList.add(new Pair<>(EnumWrappers.ItemSlot.OFFHAND, offHand));
+//        final ItemStack hat = this.getCosmeticItem(user, equipment, playerArmor.getHat(), EquipmentSlot.HEAD, hidden);
+//        hatList.add(new Pair<>(EnumWrappers.ItemSlot.HEAD, hat));
+//        final ItemStack offHand = this.getCosmeticItem(user, equipment, playerArmor.getOffHand(), EquipmentSlot.OFF_HAND, hidden);
+//        offHandList.add(new Pair<>(EnumWrappers.ItemSlot.OFFHAND, offHand));
 
-        if (!hat.equals(equipment.getItem(EquipmentSlot.HEAD))) {
-            PacketManager.sendPacket(
+        for (final ArmorItem.Type type : ArmorItem.Type.values()) {
+            if (type.getSlot() == null) continue;
+            this.sendUpdatePacket(
+                    user,
                     other,
-                    PacketManager.getEquipmentPacket(
-                            hatList,
-                            user.getEntityId()
-                    )
+                    equipment,
+                    type,
+                    hidden
             );
         }
 
-        if (!offHand.equals(equipment.getItem(EquipmentSlot.OFF_HAND))) {
+//        if (!hat.equals(equipment.getItem(EquipmentSlot.HEAD))) {
+//            PacketManager.sendPacket(
+//                    other,
+//                    PacketManager.getEquipmentPacket(
+//                            hatList,
+//                            user.getEntityId()
+//                    )
+//            );
+//        }
+//
+//        if (!offHand.equals(equipment.getItem(EquipmentSlot.OFF_HAND))) {
+//            PacketManager.sendPacket(
+//                    other,
+//                    PacketManager.getEquipmentPacket(
+//                            offHandList,
+//                            user.getEntityId()
+//                    )
+//            );
+//        }
+    }
+
+    private void sendUpdatePacket(
+            final User user,
+            final Player other,
+            final Equipment equipment,
+            final ArmorItem.Type type,
+            final boolean hidden) {
+        final PlayerArmor playerArmor = user.getPlayerArmor();
+        final EquipmentSlot slot = type.getSlot();
+        final ItemStack itemStack = this.getCosmeticItem(user, equipment, playerArmor.getItem(type), slot, hidden);
+        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> itemList = new ArrayList<>();
+        itemList.add(new Pair<>(EnumWrappers.ItemSlot.valueOf(slot.toString()), itemStack));
+        if (!itemList.equals(equipment.getItem(slot))) {
             PacketManager.sendPacket(
                     other,
                     PacketManager.getEquipmentPacket(
-                            offHandList,
+                            itemList,
                             user.getEntityId()
                     )
             );

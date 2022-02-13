@@ -10,6 +10,7 @@ import java.util.List;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -264,10 +265,22 @@ public class ArmorItem extends GuiItem {
 
     public enum Type {
 
-        HAT,
-        BACKPACK,
-        OFF_HAND
+        HAT(EquipmentSlot.HEAD),
+        BACKPACK(null),
+        OFF_HAND(EquipmentSlot.OFF_HAND),
+        CHEST_PLATE(EquipmentSlot.CHEST),
+        PANTS(EquipmentSlot.LEGS),
+        BOOTS(EquipmentSlot.FEET);
 
+        private final EquipmentSlot slot;
+
+        Type(final EquipmentSlot slot) {
+            this.slot = slot;
+        }
+
+        public EquipmentSlot getSlot() {
+            return slot;
+        }
     }
 
 }
