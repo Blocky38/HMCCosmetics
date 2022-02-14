@@ -16,6 +16,7 @@ public class CosmeticSettings {
     private static final transient String REQUIRE_EMPTY_BOOTS_PATH = "require-empty-boots";
 
     private static final transient String LOOK_DOWN_PITCH_PATH = "look-down-backpack-remove";
+    private static final String VIEW_DISTANCE_PATH = "view-distance";
 
     private boolean requireEmptyHelmet;
     private boolean requireEmptyOffHand;
@@ -23,6 +24,7 @@ public class CosmeticSettings {
     private boolean requireEmptyPants;
     private boolean requireEmptyBoots;
     private int lookDownPitch;
+    private int viewDistance;
 
     public void load(final FileConfiguration config) {
         this.requireEmptyHelmet = config.getBoolean(COSMETIC_SETTINGS_PATH + "." + REQUIRE_EMPTY_HELMET_PATH);
@@ -30,9 +32,9 @@ public class CosmeticSettings {
         this.requireEmptyChestPlate = config.getBoolean(COSMETIC_SETTINGS_PATH + "." + REQUIRE_EMPTY_CHEST_PLATE_PATH);
         this.requireEmptyPants = config.getBoolean(COSMETIC_SETTINGS_PATH + "." + REQUIRE_EMPTY_PANTS_PATH);
         this.requireEmptyBoots = config.getBoolean(COSMETIC_SETTINGS_PATH + "." + REQUIRE_EMPTY_BOOTS_PATH);
-        Bukkit.broadcastMessage("Require empty boots: " + this.requireEmptyBoots);
 
         this.lookDownPitch = config.getInt(COSMETIC_SETTINGS_PATH + "." + LOOK_DOWN_PITCH_PATH);
+        this.viewDistance = config.getInt(COSMETIC_SETTINGS_PATH + "." + VIEW_DISTANCE_PATH);
     }
 
     public boolean isRequireEmptyHelmet() {
@@ -77,6 +79,10 @@ public class CosmeticSettings {
 
     public int getLookDownPitch() {
         return lookDownPitch;
+    }
+
+    public int getViewDistance() {
+        return viewDistance;
     }
 
     public boolean requireEmpty(final EquipmentSlot slot) {

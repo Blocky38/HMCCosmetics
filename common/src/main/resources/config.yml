@@ -8,6 +8,11 @@ cosmetic-settings:
   # The pitch the player must look down for the backpack to be removed
   # Set to -1 for no removal
   look-down-backpack-remove: 70
+
+  # view distance in blocks that other players will see the backpack cosmetic
+  # setting this to lower than the server player view distance should fix the
+  # bug where players see random backpacks
+  view-distance: 32
 wardrobe:
   # if true, the wardrobe will be removed when the player is damaged
   disable-on-damage: true

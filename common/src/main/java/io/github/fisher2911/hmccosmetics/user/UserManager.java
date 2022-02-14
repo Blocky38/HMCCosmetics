@@ -61,10 +61,7 @@ public class UserManager {
         this.userMap.put(user.getUuid(), user);
         final Player player = user.getPlayer();
         if (player != null) {
-            player.sendMessage("Player Not Null");
             this.userEntityIdMap.put(user.getEntityId(), user);
-        } else {
-            Bukkit.broadcastMessage("Player Null");
         }
         this.armorStandIdMap.put(user.getArmorStandId(), user);
         this.updateCosmetics(user);
@@ -116,7 +113,7 @@ public class UserManager {
         for (final User user : this.userMap.values()) {
             final Player p = user.getPlayer();
             if (p == null) continue;
-            user.spawnArmorStand(player, p.getLocation());
+            user.spawnArmorStand(player, p.getLocation(), this.settings.getCosmeticSettings());
             this.updateCosmetics(user, player);
         }
     }
@@ -143,16 +140,7 @@ public class UserManager {
             player.updateInventory();
         }
 
-
-//        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> hatList = new ArrayList<>();
-//        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> offHandList = new ArrayList<>();
-
         final boolean hidden = !user.shouldShow(other);
-
-//        final ItemStack hat = this.getCosmeticItem(user, equipment, playerArmor.getHat(), EquipmentSlot.HEAD, hidden);
-//        hatList.add(new Pair<>(EnumWrappers.ItemSlot.HEAD, hat));
-//        final ItemStack offHand = this.getCosmeticItem(user, equipment, playerArmor.getOffHand(), EquipmentSlot.OFF_HAND, hidden);
-//        offHandList.add(new Pair<>(EnumWrappers.ItemSlot.OFFHAND, offHand));
 
         for (final ArmorItem.Type type : ArmorItem.Type.values()) {
             if (type.getSlot() == null) continue;
@@ -164,49 +152,7 @@ public class UserManager {
                     hidden
             );
         }
-
-//        if (!hat.equals(equipment.getItem(EquipmentSlot.HEAD))) {
-//            PacketManager.sendPacket(
-//                    other,
-//                    PacketManager.getEquipmentPacket(
-//                            hatList,
-//                            user.getEntityId()
-//                    )
-//            );
-//        }
-//
-//        if (!offHand.equals(equipment.getItem(EquipmentSlot.OFF_HAND))) {
-//            PacketManager.sendPacket(
-//                    other,
-//                    PacketManager.getEquipmentPacket(
-//                            offHandList,
-//                            user.getEntityId()
-//                    )
-//            );
-//        }
     }
-
-//    private void sendRemovePacket(
-//            final User user,
-//            final Player other,
-//            final ArmorItem.Type type
-//    ) {
-//        final Player player = user.getPlayer();
-//        if (player == null) return;
-//        final EquipmentSlot slot = type.getSlot();
-//        if (slot == null) return;
-//        final ItemStack itemStack = player.getEquipment().getItem(slot);
-//
-//        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> itemList = new ArrayList<>();
-//        itemList.add(new Pair<>(EnumWrappers.ItemSlot.valueOf(slot.toString().replace("_", "")), itemStack));
-//        PacketManager.sendPacket(
-//                other,
-//                PacketManager.getEquipmentPacket(
-//                        itemList,
-//                        user.getEntityId()
-//                )
-//        );
-//    }
 
     private void sendUpdatePacket(
             final User user,

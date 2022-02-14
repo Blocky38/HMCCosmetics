@@ -6,6 +6,8 @@ import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.Pair;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher.Serializer;
+import io.github.fisher2911.hmccosmetics.HMCCosmetics;
+import io.github.fisher2911.hmccosmetics.config.CosmeticSettings;
 import io.github.fisher2911.hmccosmetics.config.Settings;
 import io.github.fisher2911.hmccosmetics.gui.ArmorItem;
 import io.github.fisher2911.hmccosmetics.inventory.PlayerArmor;
@@ -21,7 +23,10 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 public class User {
@@ -36,6 +41,9 @@ public class User {
 
     private boolean hasArmorStand;
     private final int armorStandId;
+
+    // List of players that are currently viewing the armorstand
+    private final Set<UUID> viewing = new HashSet<>();
 
     public User(final UUID uuid, final int entityId, final PlayerArmor playerArmor, final Wardrobe wardrobe, final int armorStandId) {
         this.uuid = uuid;
@@ -93,9 +101,13 @@ public class User {
         return this.setItem(ArmorItem.empty(type));
     }
 
-    public void spawnArmorStand(final Player other, final Location location) {
-        final PacketContainer packet = PacketManager.getEntitySpawnPacket(location, this.armorStandId, EntityType.ARMOR_STAND);
+    public void spawnArmorStand(final Player other, final Location location, final CosmeticSettings settings) {
+        final Player player = this.getPlayer();
+        if (player == null) return;
+        if (!this.isInViewDistance(player, other, settings)) return;
 
+        final PacketContainer packet = PacketManager.getEntitySpawnPacket(location, this.armorStandId, EntityType.ARMOR_STAND);
+        this.viewing.add(other.getUniqueId());
         PacketManager.sendPacket(other, packet);
     }
 
@@ -109,7 +121,7 @@ public class User {
         if (player == null) return;
 
         for (final Player p : Bukkit.getOnlinePlayers()) {
-            this.spawnArmorStand(p, player.getLocation());
+            this.spawnArmorStand(p, player.getLocation(), settings.getCosmeticSettings());
         }
 
         this.hasArmorStand = true;
@@ -133,6 +145,17 @@ public class User {
     }
 
     public void updateArmorStand(final Player other, final Settings settings, final Location location) {
+        final Player player = this.getPlayer();
+        if (player == null) return;
+        final boolean inViewDistance = this.isInViewDistance(player, other, settings.getCosmeticSettings());
+        if (!this.viewing.contains(other.getUniqueId())) {
+           if (!inViewDistance) return;
+            this.spawnArmorStand(other, location, settings.getCosmeticSettings());
+        } else if (!inViewDistance) {
+            this.despawnAttached(other);
+            this.viewing.remove(other.getUniqueId());
+            return;
+        }
         final List<Pair<EnumWrappers.ItemSlot, ItemStack>> equipmentList = new ArrayList<>();
         final boolean hidden = !this.shouldShow(other);
         if (hidden) {
@@ -187,8 +210,20 @@ public class User {
                         !player.isSwimming());
     }
 
+    private boolean isInViewDistance(final Player player, final Player other, final CosmeticSettings settings) {
+        final Location otherLocation = other.getLocation();
+        final Location playerLocation = player.getLocation();
+        if (!Objects.equals(otherLocation.getWorld(), playerLocation.getWorld())) return false;
+        return !(otherLocation.distanceSquared(playerLocation) > settings.getViewDistance() * settings.getViewDistance());
+    }
+
     private boolean isFacingDown(final Location location, final int pitchLimit) {
         return location.getPitch() > pitchLimit;
+    }
+
+    public void despawnAttached(final Player other) {
+        PacketManager.sendPacket(other, PacketManager.getEntityDestroyPacket(this.armorStandId));
+        this.hasArmorStand = false;
     }
 
     public void despawnAttached() {

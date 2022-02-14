@@ -101,7 +101,7 @@ public class Wardrobe extends User {
         );
 
         PacketManager.sendPacket(viewer, playerInfoPacket, playerSpawnPacket);
-        this.spawnArmorStand(viewer, this.currentLocation);
+        this.spawnArmorStand(viewer, this.currentLocation, this.plugin.getSettings().getCosmeticSettings());
         this.updateArmorStand(viewer, plugin.getSettings(), this.currentLocation);
         PacketManager.sendPacket(viewer, PacketManager.getLookPacket(this.getEntityId(), this.currentLocation));
         PacketManager.sendPacket(viewer, PacketManager.getRotationPacket(this.getEntityId(), this.currentLocation));
@@ -192,6 +192,22 @@ public class Wardrobe extends User {
     @Nullable
     public Player getPlayer() {
         return Bukkit.getPlayer(this.ownerUUID);
+    }
+
+    private void hidePlayer() {
+        final Player player = this.getPlayer();
+        if (player == null) return;
+        for (final Player p : Bukkit.getOnlinePlayers()) {
+            p.hidePlayer(this.plugin, p);
+        }
+    }
+
+    private void showPlayer() {
+        final Player player = this.getPlayer();
+        if (player == null) return;
+        for (final Player p : Bukkit.getOnlinePlayers()) {
+            p.showPlayer(this.plugin, p);
+        }
     }
 
 }
