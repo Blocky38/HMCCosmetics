@@ -1,5 +1,11 @@
 package io.github.fisher2911.hmccosmetics.user;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.Pair;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
@@ -23,6 +29,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,6 +46,7 @@ public class UserManager {
     private final MessageHandler messageHandler;
 
     private final Map<UUID, User> userMap = new HashMap<>();
+    private final Map<Integer, User> userEntityIdMap = new HashMap<>();
     private final Map<Integer, User> armorStandIdMap = new HashMap<>();
 
     private BukkitTask teleportTask;
@@ -51,6 +59,13 @@ public class UserManager {
 
     public void add(final User user) {
         this.userMap.put(user.getUuid(), user);
+        final Player player = user.getPlayer();
+        if (player != null) {
+            player.sendMessage("Player Not Null");
+            this.userEntityIdMap.put(user.getEntityId(), user);
+        } else {
+            Bukkit.broadcastMessage("Player Null");
+        }
         this.armorStandIdMap.put(user.getArmorStandId(), user);
         this.updateCosmetics(user);
     }
@@ -69,6 +84,7 @@ public class UserManager {
         if (user == null) return;
 
         this.armorStandIdMap.remove(user.getArmorStandId());
+        this.userEntityIdMap.remove(user.getEntityId());
 
         final PlayerArmor copy = user.getPlayerArmor().copy();
 
@@ -124,9 +140,9 @@ public class UserManager {
             equipment = new Equipment();
         } else {
             equipment = Equipment.fromEntityEquipment(player.getEquipment());
+            player.updateInventory();
         }
 
-        final PlayerArmor playerArmor = user.getPlayerArmor();
 
 //        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> hatList = new ArrayList<>();
 //        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> offHandList = new ArrayList<>();
@@ -170,6 +186,28 @@ public class UserManager {
 //        }
     }
 
+//    private void sendRemovePacket(
+//            final User user,
+//            final Player other,
+//            final ArmorItem.Type type
+//    ) {
+//        final Player player = user.getPlayer();
+//        if (player == null) return;
+//        final EquipmentSlot slot = type.getSlot();
+//        if (slot == null) return;
+//        final ItemStack itemStack = player.getEquipment().getItem(slot);
+//
+//        final List<Pair<EnumWrappers.ItemSlot, ItemStack>> itemList = new ArrayList<>();
+//        itemList.add(new Pair<>(EnumWrappers.ItemSlot.valueOf(slot.toString().replace("_", "")), itemStack));
+//        PacketManager.sendPacket(
+//                other,
+//                PacketManager.getEquipmentPacket(
+//                        itemList,
+//                        user.getEntityId()
+//                )
+//        );
+//    }
+
     private void sendUpdatePacket(
             final User user,
             final Player other,
@@ -179,17 +217,18 @@ public class UserManager {
         final PlayerArmor playerArmor = user.getPlayerArmor();
         final EquipmentSlot slot = type.getSlot();
         final ItemStack itemStack = this.getCosmeticItem(user, equipment, playerArmor.getItem(type), slot, hidden);
+        if (itemStack.equals(equipment.getItem(slot))) return;
         final List<Pair<EnumWrappers.ItemSlot, ItemStack>> itemList = new ArrayList<>();
-        itemList.add(new Pair<>(EnumWrappers.ItemSlot.valueOf(slot.toString()), itemStack));
-        if (!itemList.equals(equipment.getItem(slot))) {
-            PacketManager.sendPacket(
-                    other,
-                    PacketManager.getEquipmentPacket(
-                            itemList,
-                            user.getEntityId()
-                    )
-            );
-        }
+        itemList.add(new Pair<>(EnumWrappers.ItemSlot.valueOf(slot.toString().replace("_", "")), itemStack));
+//        if (!itemStack.equals(equipment.getItem(slot))) {
+        PacketManager.sendPacket(
+                other,
+                PacketManager.getEquipmentPacket(
+                        itemList,
+                        user.getEntityId()
+                )
+        );
+//        }
     }
 
     private ItemStack getCosmeticItem(
@@ -208,16 +247,24 @@ public class UserManager {
                 lorePlaceholders(placeholders).
                 build();
 
+
         final boolean isAir = itemStack.getType().isAir();
         final boolean requireEmpty = cosmeticSettings.requireEmpty(slot);
 
-        if (!isAir && (!requireEmpty || user instanceof Wardrobe) && !hidden) return itemStack;
 
-        if (equipment == null) return itemStack;
+        if (!isAir && (!requireEmpty || user instanceof Wardrobe) && !hidden) {
+            return itemStack;
+        }
+
+        if (equipment == null) {
+            return itemStack;
+        }
 
         final ItemStack equipped = equipment.getItem(slot);
 
-        if (equipped != null && equipped.getType() != Material.AIR) return equipped;
+        if (equipped != null && equipped.getType() != Material.AIR && !user.getWardrobe().isActive()) {
+            return equipped;
+        }
 
         return itemStack;
     }
@@ -240,7 +287,9 @@ public class UserManager {
         setUser.setItem(event.getCosmeticItem().getArmorItem());
         Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
             switch (armorItem.getType()) {
-                case HAT, OFF_HAND -> this.updateCosmetics(setUser);
+                case HAT, OFF_HAND, CHEST_PLATE, PANTS, BOOTS -> {
+                    this.updateCosmetics(setUser);
+                }
                 case BACKPACK -> {
                     if (wardrobe.isActive()) setUser.updateArmorStand(settings);
                 }
@@ -305,5 +354,16 @@ public class UserManager {
 
     public void cancelTeleportTask() {
         this.teleportTask.cancel();
+    }
+
+    @Nullable
+    private EquipmentSlot slotFromInventorySlot(final int slot) {
+        return switch (slot) {
+            case 8 -> EquipmentSlot.FEET;
+            case 7 -> EquipmentSlot.LEGS;
+            case 6 -> EquipmentSlot.CHEST;
+            case 5 -> EquipmentSlot.HEAD;
+            default -> null;
+        };
     }
 }

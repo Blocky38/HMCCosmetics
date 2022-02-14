@@ -59,6 +59,7 @@ tasks {
     shadowJar {
         relocate("dev.triumphteam.gui", "io.github.fisher2911.hmccosmetics.gui")
         relocate("me.mattstudios.mf", "io.github.fisher2911.hmccosmetics.mf")
+        relocate("net.kyori.adventure.api", "io.github.fisher2911.hmccosmetics.adventure.api")
         relocate("net.kyori.adventure.text.minimessage", "io.github.fisher2911.hmccosmetics.adventure.minimessage")
         relocate("net.kyori.adventure.platform", "io.github.fisher2911.hmccosmetics.adventure.platform")
         relocate("org.spongepowered.configurate", "io.github.fisher2911.hmccosmetics.configurate")

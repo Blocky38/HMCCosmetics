@@ -22,7 +22,6 @@ public class Wardrobe extends User {
 
     private final HMCCosmetics plugin;
     private final UUID ownerUUID;
-    private final int entityId;
     private final int viewerId;
     private boolean active;
     private boolean cameraLocked;
@@ -34,16 +33,15 @@ public class Wardrobe extends User {
     public Wardrobe(
             final HMCCosmetics plugin,
             final UUID uuid,
+            final int entityId,
             final UUID ownerUUID,
             final PlayerArmor playerArmor,
             final int armorStandId,
-            final int entityId,
             final int viewerId,
             final boolean active) {
-        super(uuid, playerArmor, armorStandId);
+        super(uuid, entityId, playerArmor, armorStandId);
         this.plugin = plugin;
         this.ownerUUID = ownerUUID;
-        this.entityId = entityId;
         this.viewerId = viewerId;
         this.active = active;
         this.wardrobe = this;
@@ -95,7 +93,7 @@ public class Wardrobe extends User {
         final PacketContainer playerSpawnPacket = PacketManager.getFakePlayerSpawnPacket(
                 this.currentLocation,
                 this.getUuid(),
-                this.entityId
+                this.getEntityId()
         );
         final PacketContainer playerInfoPacket = PacketManager.getFakePlayerInfoPacket(
                 viewer,
@@ -166,11 +164,6 @@ public class Wardrobe extends User {
 
     public boolean isCameraLocked() {
         return cameraLocked;
-    }
-
-    @Override
-    public int getEntityId() {
-        return this.entityId;
     }
 
     @Override

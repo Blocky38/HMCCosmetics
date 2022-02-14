@@ -27,6 +27,7 @@ import java.util.UUID;
 public class User {
 
     private final UUID uuid;
+    private final int entityId;
     private final PlayerArmor playerArmor;
 
     protected Wardrobe wardrobe;
@@ -36,15 +37,17 @@ public class User {
     private boolean hasArmorStand;
     private final int armorStandId;
 
-    public User(final UUID uuid, final PlayerArmor playerArmor, final Wardrobe wardrobe, final int armorStandId) {
+    public User(final UUID uuid, final int entityId, final PlayerArmor playerArmor, final Wardrobe wardrobe, final int armorStandId) {
         this.uuid = uuid;
+        this.entityId = entityId;
         this.playerArmor = playerArmor;
         this.wardrobe = wardrobe;
         this.armorStandId = armorStandId;
     }
 
-    protected User(final UUID uuid, final PlayerArmor playerArmor, final int armorStandId) {
+    protected User(final UUID uuid, final int entityId, final PlayerArmor playerArmor, final int armorStandId) {
         this.uuid = uuid;
+        this.entityId = entityId;
         this.playerArmor = playerArmor;
         this.armorStandId = armorStandId;
     }
@@ -177,8 +180,8 @@ public class User {
 
     public boolean shouldShow(final Player other) {
         final Player player = this.getPlayer();
-        return player == null ||
-                player.getGameMode() != GameMode.SPECTATOR ||
+        if (player == null) return false;
+        return player.getGameMode() != GameMode.SPECTATOR ||
                 (!player.hasPotionEffect(PotionEffectType.INVISIBILITY) &&
                         other.canSee(player) &&
                         !player.isSwimming());
@@ -202,9 +205,7 @@ public class User {
     }
 
     public int getEntityId() {
-        final Player player = this.getPlayer();
-        if (player == null) return -1;
-        return player.getEntityId();
+        return this.entityId;
     }
 
     public boolean hasPermissionToUse(final ArmorItem armorItem) {

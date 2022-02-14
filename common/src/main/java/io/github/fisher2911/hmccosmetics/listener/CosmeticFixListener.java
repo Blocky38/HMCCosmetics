@@ -42,22 +42,6 @@ public class CosmeticFixListener implements Listener {
         this.fixCosmetics(event.getPlayer());
     }
 
-    @EventHandler
-    public void onRightClick(final PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK
-                && event.getHand() != EquipmentSlot.OFF_HAND) {
-            return;
-        }
-        final Player player = event.getPlayer();
-
-        final ItemStack mainHand = event.getPlayer().getInventory().getItemInMainHand();
-
-        if (mainHand.getType().isBlock() && mainHand.getAmount() > 0) {
-            return;
-        }
-        this.userManager.updateCosmetics(player.getUniqueId());
-    }
-
     @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(final BlockPlaceEvent event) {
         if (event.getHand() != EquipmentSlot.OFF_HAND) {

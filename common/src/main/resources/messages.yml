@@ -23,7 +23,12 @@ set-other-off-hand: "%prefix% <gradient:#6D9DC5:#45CDE9>You have set the off han
 set-other-chest-plate: "%prefix% <gradient:#6D9DC5:#45CDE9>You have set the chest plate of %player% to %type%"
 set-other-pants: "%prefix% <gradient:#6D9DC5:#45CDE9>You have set the pants of %player% to %type%"
 set-other-boots: "%prefix% <gradient:#6D9DC5:#45CDE9>You have set the boots of %player% to %type%"
-opened-wardrobe: "%prefix% <gradient:#6D9DC5:#45CDE9>Viewing wardrobe!"
+opened-wardrobe:
+  type: title
+  message: "%prefix% <gradient:#6D9DC5:#45CDE9>Viewing wardrobe!"
+  fade-in: 2
+  duration: 2
+  fade-out: 2
 closed-wardrobe: "%prefix% <gradient:#6D9DC5:#45CDE9>Closed wardrobe!"
 wardrobe-already-open: "%prefix% <gradient:#6D9DC5:#45CDE9><red>The wardrobe is already open!"
 not-near-wardrobe: "%prefix% <gradient:#6D9DC5:#45CDE9><red>You are not near the wardrobe!"

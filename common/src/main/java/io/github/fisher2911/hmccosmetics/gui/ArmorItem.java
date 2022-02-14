@@ -1,5 +1,6 @@
 package io.github.fisher2911.hmccosmetics.gui;
 
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import dev.triumphteam.gui.components.GuiAction;
 import dev.triumphteam.gui.guis.GuiItem;
 import io.github.fisher2911.hmccosmetics.util.builder.ColorBuilder;
@@ -281,6 +282,25 @@ public class ArmorItem extends GuiItem {
         public EquipmentSlot getSlot() {
             return slot;
         }
-    }
 
+        @Nullable
+        public static Type fromWrapper(EnumWrappers.ItemSlot slot) {
+            return switch (slot) {
+                case HEAD -> Type.HAT;
+                case CHEST -> Type.CHEST_PLATE;
+                case LEGS -> Type.PANTS;
+                case FEET -> Type.BOOTS;
+                case OFFHAND -> Type.OFF_HAND;
+                default -> null;
+            };
+        }
+
+        @Nullable
+        public static Type fromEquipmentSlot(final EquipmentSlot slot) {
+            for (final Type type : values()) {
+                if (type.getSlot() == slot) return type;
+            }
+            return null;
+        }
+    }
 }

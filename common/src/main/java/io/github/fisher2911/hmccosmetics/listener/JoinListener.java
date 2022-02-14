@@ -30,7 +30,7 @@ public class JoinListener implements Listener {
     @EventHandler
     public void onJoin(final PlayerJoinEvent event) {
         final Player player = event.getPlayer();
-        this.database.loadUser(player.getUniqueId(),
+        this.database.loadUser(player,
                 user -> Bukkit.getScheduler().runTaskAsynchronously(this.plugin,
                         () -> {
                             this.userManager.resendCosmetics(player);
