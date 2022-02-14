@@ -137,7 +137,6 @@ public class UserManager {
             equipment = new Equipment();
         } else {
             equipment = Equipment.fromEntityEquipment(player.getEquipment());
-            player.updateInventory();
         }
 
         final boolean hidden = !user.shouldShow(other);

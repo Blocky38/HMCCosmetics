@@ -223,6 +223,7 @@ public class User {
 
     public void despawnAttached(final Player other) {
         PacketManager.sendPacket(other, PacketManager.getEntityDestroyPacket(this.armorStandId));
+        this.viewing.remove(other.getUniqueId());
         this.hasArmorStand = false;
     }
 

@@ -56,6 +56,7 @@ public class Wardrobe extends User {
                     () -> {
                         viewer.teleport(settings.getViewerLocation());
                         this.cameraLocked = true;
+                        this.hidePlayer();
                     }
             ).execute();
             // for if we ever switch to packets
@@ -123,6 +124,7 @@ public class Wardrobe extends User {
                 // for spectator packets
 //                PacketManager.getEntityDestroyPacket(this.viewerId)
         );
+        this.showPlayer();
         this.despawnAttached();
         this.active = false;
         this.spawned = false;
@@ -198,7 +200,8 @@ public class Wardrobe extends User {
         final Player player = this.getPlayer();
         if (player == null) return;
         for (final Player p : Bukkit.getOnlinePlayers()) {
-            p.hidePlayer(this.plugin, p);
+            p.hidePlayer(this.plugin, player);
+            player.hidePlayer(this.plugin, p);
         }
     }
 
@@ -206,7 +209,8 @@ public class Wardrobe extends User {
         final Player player = this.getPlayer();
         if (player == null) return;
         for (final Player p : Bukkit.getOnlinePlayers()) {
-            p.showPlayer(this.plugin, p);
+            p.showPlayer(this.plugin, player);
+            player.showPlayer(this.plugin, p);
         }
     }
 

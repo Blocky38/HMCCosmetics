@@ -35,7 +35,7 @@ dependencies {
     compileOnly("com.github.oraxen:oraxen:-SNAPSHOT")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:2.5.4")
     implementation("net.kyori:adventure-api:4.9.3")
-    implementation("net.kyori:adventure-text-minimessage:4.10.0-SNAPSHOT")
+    implementation ("net.kyori:adventure-text-minimessage:4.10.0-SNAPSHOT")
     implementation("net.kyori:adventure-platform-bukkit:4.0.1")
     implementation("dev.triumphteam:triumph-gui:3.1.1")
     implementation("me.mattstudios.utils:matt-framework:1.4.6")
@@ -59,7 +59,6 @@ tasks {
     shadowJar {
         relocate("dev.triumphteam.gui", "io.github.fisher2911.hmccosmetics.gui")
         relocate("me.mattstudios.mf", "io.github.fisher2911.hmccosmetics.mf")
-        relocate("net.kyori.adventure.api", "io.github.fisher2911.hmccosmetics.adventure.api")
         relocate("net.kyori.adventure.text.minimessage", "io.github.fisher2911.hmccosmetics.adventure.minimessage")
         relocate("net.kyori.adventure.platform", "io.github.fisher2911.hmccosmetics.adventure.platform")
         relocate("org.spongepowered.configurate", "io.github.fisher2911.hmccosmetics.configurate")
